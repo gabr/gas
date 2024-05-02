@@ -24,6 +24,13 @@ pub fn main() !void {
     try stdout_bw.flush(); // don't forget to flush!
 }
 
+fn between(buf: []const u8, pos: usize, left: []const u8, right: []const u8) ?[]const u8 {
+    var left_i: usize = 0; var right_i: usize = 0;
+    left_i  = std.mem.indexOfPosLinear(u8, buf, pos,    left)  orelse return null;
+    right_i = std.mem.indexOfPosLinear(u8, buf, left_i, right) orelse return null;
+    return buf[(left_i+left.len)..right_i];
+}
+
 const TokenBetween = struct {
     buf:   []const u8,
     left:  []const u8,
@@ -31,11 +38,8 @@ const TokenBetween = struct {
     pos: usize = 0,
 
     pub fn next(self: *TokenBetween) ?[]const u8 {
-        var left_i: usize = 0; var right_i: usize = 0;
-        left_i  = std.mem.indexOfPosLinear(u8, self.buf, self.pos, self.left)  orelse return null;
-        right_i = std.mem.indexOfPosLinear(u8, self.buf, left_i,   self.right) orelse return null;
-        const res = self.buf[(left_i+self.left.len)..right_i];
-        self.pos = right_i+self.right.len;
+        const res = between(self.buf, self.pos, self.left, self.right) orelse return null;
+        self.pos = self.pos+res.len+self.right.len;
         return res;
     }
 };
@@ -43,10 +47,8 @@ const TokenBetween = struct {
 fn writeAtomSummary(buf: []u8, writer: anytype) !void {
     var entries_it = TokenBetween { .buf = buf, .left = "<entry>", .right = "</entry>" };
     while (entries_it.next()) |entry| {
-        var title_it   = TokenBetween { .buf = entry, .left = "<title>",   .right = "</title>"   };
-        var updated_it = TokenBetween { .buf = entry, .left = "<updated>", .right = "</updated>" };
-        const title   = title_it.next()   orelse return;
-        const updated = updated_it.next() orelse return;
+        const title   = between(entry, 0, "<title>",   "</title>")   orelse return;
+        const updated = between(entry, 0, "<updated>", "</updated>") orelse return;
         try writer.print("{s}  {s}\n", .{updated, title});
         try writer.print("{s}\n", .{std.mem.trim(u8, entry, "\n\r\t")});
     }
