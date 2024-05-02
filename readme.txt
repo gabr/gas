@@ -8,5 +8,5 @@ zig version:  0.12.0
 running:
 
     $ zig build run
-    
+    $ ./zig-out/bin/gas
 
