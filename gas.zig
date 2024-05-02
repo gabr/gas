@@ -26,8 +26,8 @@ pub fn main() !void {
 
 fn between(buf: []const u8, pos: usize, left: []const u8, right: []const u8) ?[]const u8 {
     var left_i: usize = 0; var right_i: usize = 0;
-    left_i  = std.mem.indexOfPosLinear(u8, buf, pos,    left)  orelse return null;
-    right_i = std.mem.indexOfPosLinear(u8, buf, left_i, right) orelse return null;
+    left_i  = std.mem.indexOfPosLinear(u8, buf, pos,             left )  orelse return null;
+    right_i = std.mem.indexOfPosLinear(u8, buf, left_i+left.len, right) orelse return null;
     return buf[(left_i+left.len)..right_i];
 }
 
