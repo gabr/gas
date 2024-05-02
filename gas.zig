@@ -47,8 +47,8 @@ const TokenBetween = struct {
 fn writeAtomSummary(buf: []u8, writer: anytype) !void {
     var entries_it = TokenBetween { .buf = buf, .left = "<entry>", .right = "</entry>" };
     while (entries_it.next()) |entry| {
-        const title   = between(entry, 0, "<title>",   "</title>")   orelse return;
-        const updated = between(entry, 0, "<updated>", "</updated>") orelse return;
+        const title   = between(entry, 0, "<title>",   "</title>")   orelse continue;
+        const updated = between(entry, 0, "<updated>", "</updated>") orelse continue;
         try writer.print("{s}  {s}\n", .{updated, title});
         try writer.print("{s}\n", .{std.mem.trim(u8, entry, "\n\r\t")});
     }
