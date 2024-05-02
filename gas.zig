@@ -45,11 +45,25 @@ const TokenBetween = struct {
 };
 
 fn writeAtomSummary(buf: []u8, writer: anytype) !void {
+    const indent = "  ";
     var entries_it = TokenBetween { .buf = buf, .left = "<entry>", .right = "</entry>" };
     while (entries_it.next()) |entry| {
-        const title   = between(entry, 0, "<title>",   "</title>")   orelse continue;
-        const updated = between(entry, 0, "<updated>", "</updated>") orelse continue;
-        try writer.print("{s}  {s}\n", .{updated, title});
-        try writer.print("{s}\n", .{std.mem.trim(u8, entry, "\n\r\t")});
+        const title   = between(entry, 0, "<title>",       "</title>"  )  orelse continue;
+        const updated = between(entry, 0, "<updated>",     "</updated>")  orelse continue;
+        const link    = between(entry, 0, "<link href=\"", "\" rel="   )  orelse continue;
+        const summary = between(entry, 0, "<summary>",     "</summary>")  orelse continue;
+        try writer.print("{s}  {s}\n{s}{s}\n{s}", .{updated, title, indent, link, indent});
+        // print summary word by word to skip new lines and add indentation
+        var summary_it = std.mem.tokenizeAny(u8, summary, " \n\t\r");
+        var line_len: usize = 0;
+        while (summary_it.next()) |word| {
+            if (line_len+word.len > (80-indent.len)) {
+                try writer.print("\n{s}", .{indent});
+                line_len = 0;
+            }
+            try writer.print("{s} ", .{word});
+            line_len += word.len;
+        }
+        _ = try writer.write("\n\n");
     }
 }
