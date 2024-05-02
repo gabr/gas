@@ -21,7 +21,7 @@ pub fn main() !void {
             return error.FailedToFetchAtomXml;
         },
     }
-    try stdout_bw.flush(); // don't forget to flush!
+    try stdout_bw.flush();
 }
 
 fn between(buf: []const u8, pos: usize, left: []const u8, right: []const u8) ?[]const u8 {
