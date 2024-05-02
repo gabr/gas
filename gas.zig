@@ -9,7 +9,7 @@ pub fn main() !void {
     var client = std.http.Client {.allocator=allocator};
     var res_buf = std.ArrayList(u8).init(allocator);
     defer res_buf.deinit();
-    try stdout.print("Fetching data...\n", .{});
+    std.debug.print("Fetching data...\n", .{});
     const res = try client.fetch(.{
         .location = .{.url = "http://arek.gabr.pl/atom.xml"},
         .response_storage = .{.dynamic = &res_buf},
