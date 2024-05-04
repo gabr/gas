@@ -62,7 +62,7 @@ fn writeAtomSummary(buf: []u8, writer: anytype) !void {
                 line_len = 0;
             }
             try writer.print("{s} ", .{word});
-            line_len += word.len;
+            line_len += word.len + 1;
         }
         _ = try writer.write("\n\n");
     }
